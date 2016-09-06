@@ -73,7 +73,7 @@ class Shell(object):
 
     def open(self, host, port=22, username=None, password=None, timeout=10,
              key_filename=None, pkey=None, look_for_keys=None,
-             allow_agent=False, key_policy="loose"):
+             allow_agent=False, key_policy="loose", proxy_command=None):
 
         self.ssh = paramiko.SSHClient()
         if key_policy != "ignore":
@@ -93,11 +93,28 @@ class Shell(object):
         if not look_for_keys:
             look_for_keys = password is None
 
+        sock_kwarg = {}
+        if proxy_command:
+            replacers = {
+                '%h': host,
+                '%p': port,
+                '%r': username
+            }
+            for find, replace in replacers.items():
+                proxy_command = proxy_command.replace(find, str(replace))
+            try:
+                sock_kwarg = {'sock': paramiko.ProxyCommand(proxy_command)}
+            except AttributeError:
+                raise ShellError('Paramiko ProxyCommand support unavailable. '
+                                 'Please upgrade to Paramiko 1.9.0 or newer. '
+                                 'Not using configured ProxyCommand')
+                                 
         try:
             self.ssh.connect(
                 host, port=port, username=username, password=password,
                 timeout=timeout, look_for_keys=look_for_keys, pkey=pkey,
                 key_filename=key_filename, allow_agent=allow_agent,
+                **sock_kwarg
             )
 
             self.shell = self.ssh.invoke_shell()
@@ -218,6 +235,8 @@ class CliBase(object):
         password = params.get('password')
         key_file = params.get('ssh_keyfile')
         timeout = params['timeout']
+        
+        proxy_command = params['proxy_command']
 
         try:
             self.shell = Shell(
@@ -228,6 +247,7 @@ class CliBase(object):
             self.shell.open(
                 host, port=port, username=username, password=password,
                 key_filename=key_file, timeout=timeout,
+                proxy_command=proxy_command
             )
         except ShellError:
             exc = get_exception()

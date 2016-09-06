@@ -47,7 +47,9 @@ NET_TRANSPORT_ARGS = dict(
     provider=dict(type='dict'),
     transport=dict(choices=list()),
 
-    timeout=dict(default=10, type='int')
+    timeout=dict(default=10, type='int'),
+
+    proxy_command=dict()
 )
 
 NET_CONNECTION_ARGS = dict()

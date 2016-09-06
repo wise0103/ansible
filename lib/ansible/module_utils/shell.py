@@ -271,6 +271,9 @@ class CliBase(object):
     def authorize(self, params, **kwargs):
         pass
 
+    def initialize(self, params, **kwargs):
+        pass
+
     ### Command methods ###
 
     def execute(self, commands, **kwargs):

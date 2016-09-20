@@ -78,6 +78,11 @@ class Cli(object):
             cmd = cmd['command']
         if isinstance(prompt, string_types):
             prompt = re.compile(re.escape(prompt))
+        elif isinstance(prompt, (list, tuple)):
+            temp = []
+            for index in range(len(prompt)):
+                temp.append(re.compile(re.escape(prompt[index])))
+            prompt = temp
         return Command(command, output, prompt=prompt, response=response)
 
     def add_commands(self, commands, output=None, **kwargs):

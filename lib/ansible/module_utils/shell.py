@@ -147,10 +147,17 @@ class Shell(object):
             window = self.strip(recv.read())
 
             if hasattr(cmd, 'prompt') and not handled:
-                if self.handle_prompt(window, prompt=cmd.prompt, response=cmd.response):
-                    handled = True
+                prompt_matched = self.handle_prompt(window, prompt=cmd.prompt, response=cmd.response)
+                if prompt_matched:
+                    if isinstance(cmd.prompt, (list, tuple)):
+                        del cmd.response[cmd.prompt.index(prompt_matched)]
+                        del cmd.prompt[cmd.prompt.index(prompt_matched)]
+                        if cmd.prompt == []:
+                            handled = True
+                    else:
+                        handled = True
                     time.sleep(cmd.delay)
-                    if cmd.is_reboot:
+                    if cmd.is_reboot and handled:
                         return
 
             try:
@@ -191,7 +198,7 @@ class Shell(object):
             if match:
                 cmd = '%s\r' % ans
                 self.shell.sendall(cmd)
-                return True
+                return pr
 
     def sanitize(self, cmd, resp):
         cleaned = []

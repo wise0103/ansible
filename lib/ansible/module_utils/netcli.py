@@ -69,7 +69,8 @@ class Cli(object):
             objects.append(self.to_command(cmd, output))
         return self.connection.run_commands(objects)
 
-    def to_command(self, command, output=None, prompt=None, response=None):
+    def to_command(self, command, output=None, prompt=None, response=None,
+                   is_reboot=False, delay=0):
         output = output or self.default_output
         if isinstance(command, Command):
             return command
@@ -83,7 +84,8 @@ class Cli(object):
             for index in range(len(prompt)):
                 temp.append(re.compile(re.escape(prompt[index])))
             prompt = temp
-        return Command(command, output, prompt=prompt, response=response)
+        return Command(command, output, prompt=prompt, response=response,
+                       is_reboot=is_reboot, delay=delay)
 
     def add_commands(self, commands, output=None, **kwargs):
         for cmd in commands:
@@ -136,11 +138,13 @@ class CommandRunner(object):
         self._default_output = module.connection.default_output
 
 
-    def add_command(self, command, output=None, prompt=None, response=None):
+    def add_command(self, command, output=None, prompt=None, response=None,
+                    is_reboot=False, delay=0):
         if command in [str(c) for c in self.commands]:
             raise AddCommandError('duplicated command detected', command=command)
         cmd = self.module.cli.to_command(command, output=output, prompt=prompt,
-                                         response=response)
+                                         response=response, is_reboot=is_reboot,
+                                         delay=delay)
         self.commands.append(cmd)
 
     def get_command(self, command, output=None):

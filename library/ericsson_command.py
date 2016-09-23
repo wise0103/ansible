@@ -11,7 +11,7 @@ from ansible.module_utils.network import NetworkModule, NetworkError
 from ansible.module_utils.ericsson.cli import *
 
 
-VALID_KEYS = ['command', 'output', 'prompt', 'response']
+VALID_KEYS = ['command', 'output', 'prompt', 'response', 'is_reboot', 'delay']
 
 def to_lines(stdout):
     for item in stdout:

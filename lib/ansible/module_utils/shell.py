@@ -150,15 +150,18 @@ class Shell(object):
                 prompt_matched = self.handle_prompt(window, prompt=cmd.prompt, response=cmd.response)
                 if prompt_matched:
                     if isinstance(cmd.prompt, (list, tuple)):
-                        del cmd.response[cmd.prompt.index(prompt_matched)]
-                        del cmd.prompt[cmd.prompt.index(prompt_matched)]
-                        if cmd.prompt == []:
+                        index = cmd.prompt.index(prompt_matched)
+                        del cmd.response[index]
+                        del cmd.prompt[index]
+                        if cmd.prompt == [] or index >= len(cmd.prompt):
                             handled = True
                     else:
                         handled = True
-                    time.sleep(cmd.delay)
-                    if cmd.is_reboot and handled:
-                        return
+                    if handled:
+                        time.sleep(cmd.delay)
+                        if cmd.is_reboot:
+                            resp = self.strip(recv.getvalue())
+                            return self.sanitize(cmd, resp)
 
             try:
                 if self.find_prompt(window):
